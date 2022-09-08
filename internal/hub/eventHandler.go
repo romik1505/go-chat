@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/romik1505/chat/internal/mapper"
 	"github.com/romik1505/chat/internal/model"
 	"github.com/romik1505/chat/internal/store"
 )
@@ -16,14 +17,15 @@ func (e EventService) HandleEvent(ctx context.Context, event Event) ([]byte, err
 
 	switch event.EventType {
 	case EventTypeConnect:
-		ticket := event.EventData.(*model.EventData_Connect).Ticket
+		ticket := event.EventData.(*mapper.EventData_Connect).Ticket
 
 		// Подгрузка из другого сервиса
 		event.Client.ClientData.Ticket = ticket
 		fmt.Printf("ticket %s", ticket)
-		user, ok := model.ClientsDB[ticket]
-		if !ok {
-			return nil, fmt.Errorf("user not found")
+
+		user, err := e.UserService.GetUser(ctx, ticket)
+		if err != nil {
+			return nil, fmt.Errorf("user not found: %v", err)
 		}
 		event.Client.ClientData.User = user
 
@@ -32,7 +34,7 @@ func (e EventService) HandleEvent(ctx context.Context, event Event) ([]byte, err
 			return nil, fmt.Errorf("user already connected")
 		}
 
-		event.EventData = &model.EventData_Connect{
+		event.EventData = &mapper.EventData_Connect{
 			User: user,
 		}
 
@@ -44,27 +46,23 @@ func (e EventService) HandleEvent(ctx context.Context, event Event) ([]byte, err
 		}
 
 	case EventTypeDisconnect:
-		event.EventData = model.EventData_Disconnnect{
+		event.EventData = mapper.EventData_Disconnnect{
 			User: event.Client.ClientData.User,
 		}
 		e.hub.Unregister <- event.Client
 
 	case EventTypePersonalMessage, EventTypeGroupMessage:
-		event.EventData.(*model.EventData_SendMessage).Sender = event.Client.ClientData.User
-		event.EventData.(*model.EventData_SendMessage).Date = time.Now()
+		event.EventData.(*mapper.EventData_SendMessage).Sender = event.Client.ClientData.User
+		event.EventData.(*mapper.EventData_SendMessage).Date = time.Now()
 		go e.MessageService.SaveMessage(ctx, ConvertEventMessage(event))
 
 	// Уведомление о смене данных должно приходить из другого сервиса посредством pubSub
 	// Для примера будем брать ее тоже от клиетов
 	case EventTypeChangeUserdata:
-		updData := event.EventData.(*model.EventData_ChangeUserdata).UpdatedData
+		updData := event.EventData.(*mapper.EventData_ChangeUserdata).UpdatedData
 		updData.ID = event.Client.ClientData.User.ID
 
 		event.Client.ClientData.User = updData
-
-		event.EventData.(*model.EventData_ChangeUserdata).Updates = model.UserMap{
-			event.Client.ClientData.User.ID: updData,
-		}
 	}
 
 	event.EventData.ClearPrivateData()
@@ -77,7 +75,7 @@ func (e EventService) HandleEvent(ctx context.Context, event Event) ([]byte, err
 }
 
 func ConvertEventMessage(event Event) model.StoredMessage {
-	eventData := event.EventData.(*model.EventData_SendMessage)
+	eventData := event.EventData.(*mapper.EventData_SendMessage)
 
 	res := model.StoredMessage{
 		Text:       store.NewNullString(eventData.TextMessage),

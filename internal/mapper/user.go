@@ -30,3 +30,13 @@ func ConvertUsers(u []model.User) []User {
 	}
 	return ret
 }
+
+type ClientData struct {
+	User   User
+	Ticket string // TODO: TIKET
+}
+
+type FriendRequest struct {
+	UserID   string `json:"user_id"`
+	FriendID string `json:"friend_id"`
+}

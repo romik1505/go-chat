@@ -14,8 +14,8 @@ type MessageService struct {
 }
 
 type IMessageService interface {
-	SendMessage(context.Context) error
-	MessageList(context.Context) error
+	SaveMessage(ctx context.Context, mes model.StoredMessage) (mapper.Message, error)
+	MessageList(ctx context.Context, opts mapper.MessageOpts) ([]mapper.Message, error)
 }
 
 func NewMessageService(s store.Storage) *MessageService {

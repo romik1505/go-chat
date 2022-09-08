@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/romik1505/chat/internal/model"
+	"github.com/romik1505/chat/internal/mapper"
 )
 
 const (
@@ -76,14 +76,14 @@ func (h *Hub) Run() {
 }
 
 // TODO: Заполнять информацию из кеша(redis)
-func (h Hub) GetUserMap() model.UserMap {
-	result := make(model.UserMap, len(h.Clients))
+func (h Hub) GetUserMap() mapper.UserMap {
+	result := make(mapper.UserMap, len(h.Clients))
 
 	for uuid, cl := range h.Clients {
-		result[uuid] = model.UserData{
+		result[uuid] = mapper.UserData{
 			ID:       uuid,
 			Username: cl.ClientData.User.Username,
-			ImgUrl:   cl.ClientData.User.ImgUrl,
+			ImgUrl:   cl.ClientData.User.Img,
 		}
 	}
 	return result

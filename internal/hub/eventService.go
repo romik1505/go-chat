@@ -5,19 +5,22 @@ import (
 	"log"
 
 	"github.com/romik1505/chat/internal/service/message"
+	"github.com/romik1505/chat/internal/service/user"
 )
 
 type EventService struct {
 	hub            *Hub
 	Events         chan Event
 	MessageService *message.MessageService
+	UserService    *user.UserService
 	// DB
 }
 
-func NewEventService(ms *message.MessageService) *EventService {
+func NewEventService(ms *message.MessageService, us *user.UserService) *EventService {
 	return &EventService{
 		Events:         make(chan Event, 1),
 		MessageService: ms,
+		UserService:    us,
 	}
 }
 

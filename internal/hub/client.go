@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/romik1505/chat/internal/model"
+	"github.com/romik1505/chat/internal/mapper"
 )
 
 type Client struct {
-	ClientData model.ClientData
+	ClientData mapper.ClientData
 	conn       *websocket.Conn
 	Send       chan []byte
 	hub        *Hub

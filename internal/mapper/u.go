@@ -1,9 +1,4 @@
-package model
-
-type ClientData struct {
-	User   User
-	Ticket string // TODO: TIKET
-}
+package mapper
 
 // type ChannelData struct {
 // 	ID    string  `json:"id"`
@@ -26,7 +21,7 @@ type GroupMessage struct {
 }
 
 // TODO: DELETE
-type Message struct {
+type EventMessage struct {
 	Type string                `json:"type"`
 	Data EventData_SendMessage `json:"data"`
 }
@@ -113,5 +108,3 @@ type Message struct {
 // 	Username string `json:"username,omitempty"`
 // 	ImgUrl   string `json:"img,omitempty"`
 // }
-
-type UserMap map[string]User

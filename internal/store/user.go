@@ -16,9 +16,25 @@ func (s Storage) CreateUser(ctx context.Context, user model.User) (model.User, e
 	return user, err
 }
 
+func applyUserFilters(query sq.SelectBuilder, user model.User) sq.SelectBuilder {
+	if user.ID.Valid {
+		query = query.Where(sq.Eq{"id": user.ID})
+	}
+	if user.Username.Valid {
+		query = query.Where(sq.Eq{"username": user.Username})
+	}
+	if user.Password.Valid {
+		query = query.Where(sq.Eq{"password": user.Password})
+	}
+	return query
+}
+
 func (s Storage) GetUser(ctx context.Context, user model.User) (model.User, error) {
-	query := s.Builder().Select("*").From("users").Where(sq.Eq{"username": user.Username, "password": user.Password})
-	err := query.QueryRow().Scan(&user)
+	query := s.Builder().Select("*").From("users")
+	query = applyUserFilters(query, user)
+
+	sql, vars := query.MustSql()
+	err := s.QueryRowx(sql, vars...).StructScan(&user)
 	if err != nil {
 		return model.User{}, err
 	}
@@ -26,13 +42,15 @@ func (s Storage) GetUser(ctx context.Context, user model.User) (model.User, erro
 }
 
 func (s Storage) UserList(ctx context.Context) ([]model.User, error) {
-	q := s.Builder().Select("*").From("users").GroupBy("id")
+	q := s.Builder().Select("*").From("users").OrderBy("id")
 
-	// rows, err := query.Query()
 	users := make([]model.User, 0)
 
-	query, _, _ := q.ToSql()
+	query, _ := q.MustSql()
 	rows, err := s.Queryx(query)
+	if err != nil {
+		return nil, err
+	}
 
 	for rows.Next() {
 		var user model.User

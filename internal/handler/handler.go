@@ -105,15 +105,69 @@ func (h Handler) login(w http.ResponseWriter, r *http.Request) {
 // 	}
 // }
 
-// func (h Handler) getFriends(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Access-Control-Allow-Origin", "*")
+func (h Handler) getFriends(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	userID := r.URL.Query().Get("user_id")
+	friends, err := h.UserService.GetFriends(context.Background(), userID)
 
-// 	if err := json.NewEncoder(w).Encode(model.ClientsDB); err != nil {
-// 		log.Println(err.Error())
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
-// }
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(friends); err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}
+
+func (h Handler) getFriendRequests(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	userID := r.URL.Query().Get("user_id")
+	friends, err := h.UserService.GetFriendRequests(context.Background(), userID)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(friends); err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}
+
+func (h Handler) sendFriendRequest(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	req := mapper.FriendRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err := h.UserService.SendFriendRequest(context.Background(), req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h Handler) acceptFriend(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	req := mapper.FriendRequest{}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err := h.UserService.AcceptFriendRequest(context.Background(), req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
 
 func (h Handler) activeUsers() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

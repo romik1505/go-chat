@@ -14,7 +14,7 @@ type MessageSearchOpts struct {
 	UserID   string
 }
 
-func applyFilter(q sq.SelectBuilder, opts MessageSearchOpts) sq.SelectBuilder {
+func applyMessageFilter(q sq.SelectBuilder, opts MessageSearchOpts) sq.SelectBuilder {
 	q = q.Where(sq.Eq{"receiver_type": opts.ChatType})
 
 	if opts.ChatType == "group" {
@@ -31,7 +31,7 @@ func applyFilter(q sq.SelectBuilder, opts MessageSearchOpts) sq.SelectBuilder {
 func (s Storage) MessageList(ctx context.Context, opts MessageSearchOpts) ([]model.StoredMessage, error) {
 	q := s.Builder().Select("*").From("messages").OrderBy("DESC created_at")
 
-	q = applyFilter(q, opts)
+	q = applyMessageFilter(q, opts)
 
 	sql, _, _ := q.ToSql()
 	rows, err := s.Queryx(sql)

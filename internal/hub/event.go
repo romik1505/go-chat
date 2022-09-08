@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/romik1505/chat/internal/model"
+	"github.com/romik1505/chat/internal/mapper"
 )
 
 const (
@@ -28,10 +28,10 @@ const (
 type EventType string
 
 type Event struct {
-	Client    *Client          `json:"-"` // Event Initiator
-	EventType EventType        `json:"type"`
-	EventData model.IEventData `json:"data,omitempty"`
-	Date      time.Time        `json:"date,omitempty"`
+	Client    *Client           `json:"-"` // Event Initiator
+	EventType EventType         `json:"type"`
+	EventData mapper.IEventData `json:"data,omitempty"`
+	Date      time.Time         `json:"date,omitempty"`
 }
 
 func NewEventConnect(cl *Client) Event {
@@ -54,17 +54,17 @@ type EventUnmarhaller struct {
 }
 
 type EventUserList struct {
-	Users model.UserMap `json:"users"`
+	Users mapper.UserMap `json:"users"`
 }
 
 func (e EventUserList) GetEventData() interface{} {
 	return e.Users
 }
 
-func NewEventUserList(users model.UserMap) Event {
+func NewEventUserList(users mapper.UserMap) Event {
 	return Event{
 		EventType: EventTypeUserList,
-		EventData: model.EventData_Userlist{
+		EventData: mapper.EventData_Userlist{
 			Users: users,
 		},
 	}
@@ -80,13 +80,13 @@ func UnmarshalEvent(data []byte) (Event, error) {
 
 	switch buff.EventType {
 	case EventTypeConnect:
-		result.EventData = new(model.EventData_Connect)
+		result.EventData = new(mapper.EventData_Connect)
 	case EventTypePersonalMessage, EventTypeGroupMessage:
-		result.EventData = new(model.EventData_SendMessage)
+		result.EventData = new(mapper.EventData_SendMessage)
 	case EventTypeDisconnect:
 		result.EventData = nil
 	case EventTypeChangeUserdata:
-		result.EventData = new(model.EventData_Disconnnect)
+		result.EventData = new(mapper.EventData_Disconnnect)
 	}
 	result.EventType = buff.EventType
 

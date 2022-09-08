@@ -35,12 +35,14 @@ CREATE TABLE messages(
     receiver_type TEXT NOT NULL,
     text TEXT NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now()
-)
+);
 
 CREATE TABLE friends(
-    user_id TEXT REFERENCES user(id),
-    user_friend TEXT REFERENCES user(id)
-)
+    user_id TEXT REFERENCES users(id),
+    user_friend TEXT REFERENCES users(id),
+    status TEXT NOT NULL,
+    CONSTRAINT PK_T1 PRIMARY KEY(user_id, user_friend)
+);
 
 -- +goose StatementEnd
 

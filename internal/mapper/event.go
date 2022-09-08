@@ -1,4 +1,4 @@
-package model
+package mapper
 
 import "time"
 
@@ -32,8 +32,7 @@ type EventData_SendMessage struct {
 func (s *EventData_SendMessage) ClearPrivateData() {}
 
 type EventData_ChangeUserdata struct {
-	UpdatedData User    `json:"updated_data,omitempty"` // IN, CLEAN
-	Updates     UserMap `json:"updates"`                // OUT
+	UpdatedData User `json:"updated_data,omitempty"` // IN, CLEAN
 }
 
 func (s *EventData_ChangeUserdata) ClearPrivateData() {

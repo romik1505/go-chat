@@ -1,12 +1,17 @@
 package group
 
-import "context"
+import (
+	"context"
+
+	"github.com/romik1505/chat/internal/store"
+)
 
 type GroupService struct {
+	Storage store.Storage
 }
 
 type IGroupService interface {
-	PushJoinRequest(context.Context) error
+	SendJoinRequest(context.Context) error
 	AcceptJoinRequest(context.Context) error
 	DeclineJoinRequest(context.Context) error
 	SetGroupOwner(context.Context) error

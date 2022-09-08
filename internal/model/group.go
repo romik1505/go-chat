@@ -12,6 +12,7 @@ type Group struct {
 	UserImg  sql.NullString `db:"user_img"`
 }
 
+// TODO private groups
 type GroupRequest struct {
 	ID      sql.NullString `db:"id"`
 	UserID  sql.NullString `db:"user_id"`

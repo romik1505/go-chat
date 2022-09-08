@@ -15,7 +15,7 @@ func main() {
 	storage := store.NewStorage()
 	ms := message.NewMessageService(storage)
 	us := user.NewUserService(storage)
-	service := hub.NewEventService(ms)
+	service := hub.NewEventService(ms, us)
 	hub := hub.NewHub(service)
 	service.SetHub(hub)
 
